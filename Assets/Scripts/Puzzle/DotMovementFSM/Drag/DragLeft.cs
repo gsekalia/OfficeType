@@ -17,7 +17,7 @@ public class DragLeft : IDotState
     {
         IDotState next = this;
 
-        if(!d.GetLeftDrag()) next = d.idleState;
+        if(!d.GetLeftDrag()) next = d.snapState;
         else if (!d.GetSelected()) next = d.checkState;
 
         return next;

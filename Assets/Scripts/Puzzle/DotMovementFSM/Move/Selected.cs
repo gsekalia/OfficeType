@@ -7,7 +7,7 @@ public class Selected : IDotState
 
     public void Action(Dot d)
     {
-        Debug.Log("SELECTED");
+        //Debug.Log("SELECTED");
         d.SelectedAction();
     }
 

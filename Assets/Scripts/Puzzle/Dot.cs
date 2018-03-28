@@ -36,48 +36,48 @@ public class Dot : MonoBehaviour {
     //[HideInInspector]
     public IDotState currState;
 
-    [HideInInspector] public Idle       idleState;
-    [HideInInspector] public Selected   selState;
-    [HideInInspector] public MoveUp     upState;
-    [HideInInspector] public MoveDown   downState;
-    [HideInInspector] public MoveLeft   leftState;
-    [HideInInspector] public MoveRight  rightState;
+    [HideInInspector] public Idle idleState;
+    [HideInInspector] public Selected selState;
+    [HideInInspector] public MoveUp upState;
+    [HideInInspector] public MoveDown downState;
+    [HideInInspector] public MoveLeft leftState;
+    [HideInInspector] public MoveRight rightState;
 
-    [HideInInspector] public DragUp     dragUpState;
-    [HideInInspector] public DragDown   dragDownState;
-    [HideInInspector] public DragLeft   dragLeftState;
-    [HideInInspector] public DragRight  dragRightState;
+    [HideInInspector] public DragUp dragUpState;
+    [HideInInspector] public DragDown dragDownState;
+    [HideInInspector] public DragLeft dragLeftState;
+    [HideInInspector] public DragRight dragRightState;
 
     [HideInInspector] public CheckMatch checkState;
-    [HideInInspector] public Fall       fallState;
-    [HideInInspector] public SnapBack   snapState;
+    [HideInInspector] public Fall fallState;
+    [HideInInspector] public SnapBack snapState;
 
 
     private void Awake()
     {
-        idleState    = new Idle();
-        selState     = new Selected();
-        upState      = new MoveUp();
-        downState    = new MoveDown();
-        leftState    = new MoveLeft();
-        rightState   = new MoveRight();
+        idleState = new Idle();
+        selState = new Selected();
+        upState = new MoveUp();
+        downState = new MoveDown();
+        leftState = new MoveLeft();
+        rightState = new MoveRight();
 
 
-        dragUpState     = new DragUp();
-        dragDownState   = new DragDown();
-        dragLeftState   = new DragLeft();
-        dragRightState  = new DragRight();
+        dragUpState = new DragUp();
+        dragDownState = new DragDown();
+        dragLeftState = new DragLeft();
+        dragRightState = new DragRight();
 
 
-        checkState   = new CheckMatch();
-        fallState    = new Fall();
-        snapState    = new SnapBack();
+        checkState = new CheckMatch();
+        fallState = new Fall();
+        snapState = new SnapBack();
 
         currState = idleState;
     }
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         board = FindObjectOfType<Board>();
         offset = board.transform.position;
@@ -86,9 +86,9 @@ public class Dot : MonoBehaviour {
         targetX = (int)transform.position.x - (int)offset.x;
         targetY = (int)transform.position.y - (int)offset.y;
 
-        startPos = transform.position - new Vector3(offset.x,offset.y,0.0f);
-        currPos  = startPos;
-        row    = targetY;
+        startPos = transform.position - new Vector3(offset.x, offset.y, 0.0f);
+        currPos = startPos;
+        row = targetY;
         column = targetX;
         isSelected = false;
 
@@ -146,7 +146,7 @@ public class Dot : MonoBehaviour {
     public void FallAction()
     {
         targetX = column;
-        targetY = row -1;
+        targetY = row - 1;
         board.allDots[column, row] = null;
         Vector2 TempPos = new Vector2(transform.position.x, targetY + offset.y);
         if (Mathf.Abs(targetY - (transform.position.y - offset.y)) > .1f)
@@ -181,27 +181,30 @@ public class Dot : MonoBehaviour {
     {
         //If your actual position vector != your starting position vector, fix that shit
         Vector2 posAdjusted = (Vector2)transform.position - offset;
-        if      (Mathf.Abs((posAdjusted.x) - startPos.x) > .1f)
+        if (Mathf.Abs((posAdjusted.x) - startPos.x) > .1f)
         {
             MoveNextGridSpaceX(startPos);
-            transform.position = new Vector2(currPos.x, startPos.y) + offset;
+            transform.position = new Vector2(startPos.x, startPos.y) + offset;
         }
 
         else if (Mathf.Abs((posAdjusted.y) - startPos.y) > .1f)
         {
             MoveNextGridSpaceY(startPos);
-            transform.position = new Vector2(startPos.x, currPos.y) + offset;
+            transform.position = new Vector2(startPos.x, startPos.y) + offset;
+
         }
 
     }
     public bool CheckIfAtStartPosition()
     {
         bool atStart = false;
-     
-        if (Mathf.Abs(startPos.x - (transform.position.x - offset.x)) < .1f &&
-            Mathf.Abs(startPos.y - (transform.position.y - offset.y)) < .1f)
-            atStart = true;
 
+        if (Mathf.Abs(startPos.x - (transform.position.x - offset.x)) < .2f &&
+            Mathf.Abs(startPos.y - (transform.position.y - offset.y)) < .2f)
+        {
+            atStart = true;
+            transform.position = startPos + offset;
+        }
         return atStart;
     }
 
@@ -214,7 +217,9 @@ public class Dot : MonoBehaviour {
         if (Mathf.Abs((currMousePos.x - offset.x) - startPos.x) > .1f)
         {
             MoveNextGridSpaceX(mousePosAdjusted);
-            transform.position = new Vector2(currMousePos.x, startPos.y +offset.y);
+            transform.position = new Vector2(currMousePos.x, startPos.y + offset.y);
+            if (!isDraggingAbove) CheckMyDragAbove(column, row);
+            else isDraggingAbove = false;
         }
 
         else if (Mathf.Abs((currMousePos.y - offset.y) - startPos.y) > .1f)
@@ -234,7 +239,7 @@ public class Dot : MonoBehaviour {
 
     public bool GetRightDrag()
     {
-        
+
         if ((transform.position.x - offset.x) - 0.0f < startPos.x)
         {
             isSelected = false;
@@ -242,7 +247,6 @@ public class Dot : MonoBehaviour {
         }
         return isSelected;
     }
-
     public bool GetLeftDrag()
     {
 
@@ -255,16 +259,22 @@ public class Dot : MonoBehaviour {
     }
 
 
-
-
     public bool GetSelected()
     {
         if (Input.GetMouseButtonUp(0))
         {
             isSelected = false;
+            if (isDraggingAbove)
+            {
+                ClearSelected();
+            }
             isDraggingAbove = false;
         }
         return isSelected;
+    }
+    public void ClearSelected()
+    {
+
     }
     //---------------------GETTING DIRECTION OF MOVEMENT-------------------------------------------------
     public Vector2 GetDir()
@@ -363,7 +373,7 @@ public class Dot : MonoBehaviour {
         transform.position = new Vector2(startPos.x + offset.x, mouseAdjusted.y + offset.y);
     }
 
-    //Can swithc this out for some vctor math, using trig for this is just wasteful
+    //Can switch this out for some vector math, using trig for this is just wasteful
     void CalculateAngle(Vector2 firstTouchPos, Vector2 finalTouchPos)
     {
         swipeAngle = Mathf.Atan2(finalTouchPos.y - firstTouchPos.y,
@@ -508,7 +518,7 @@ public class Dot : MonoBehaviour {
             int hCount = rightmost - leftmost;
             if (hCount >= 2)
             {
-                Debug.Log("Match on horizontal");
+                //Debug.Log("Match on horizontal");
                 board.DestroyRow(leftmost, rightmost, rw);
                 matchExists = true;
             }
@@ -553,7 +563,7 @@ public class Dot : MonoBehaviour {
             int vCount = upmost - downmost;
             if (vCount >= 2)
             {
-                Debug.Log("Match on vertical");
+                //Debug.Log("Match on vertical");
                 board.DestroyColumn(downmost, upmost, col);
                 matchExists = true;
             }
