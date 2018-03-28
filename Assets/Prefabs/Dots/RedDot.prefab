@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 114485097251831412}
   m_Layer: 0
   m_Name: RedDot
-  m_TagString: Untagged
+  m_TagString: Red Dot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -72,7 +72,11 @@ MonoBehaviour:
   row: 0
   targetX: 0
   targetY: 0
+  startPos: {x: 0, y: 0}
+  TempPos: {x: 0, y: 0}
+  offset: {x: 0, y: 0}
   swipeAngle: 0
+  indOff: 0.5
 --- !u!212 &212818183475250338
 SpriteRenderer:
   m_ObjectHideFlags: 1

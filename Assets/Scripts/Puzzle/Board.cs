@@ -11,6 +11,7 @@ public class Board : MonoBehaviour {
     //Prefab for the tile
     public GameObject tilePrefab;
 
+    public DotBroker dotBroker;
     //2D array which holds all the tiles
     private BackgroundTile[,] allTiles;
     public GameObject[,] allDots;
@@ -51,9 +52,53 @@ public class Board : MonoBehaviour {
         }
     }
 
-	// Update is called once per frame
-	//void Update ()
- //   {
-		
-	//}
+ 
+    //public void AddCommand(DotCommand cmd)
+    //{
+    //    //dotBroker.AddObject();
+    //      dotBroker.AddCommand(cmd);
+    //}
+
+    public void AddObject(Dot dot)
+    {
+        dotBroker.AddObject(dot);
+        //dotBroker.AddCommand(cmd);
+    }
+
+    public void ProcessCommands()
+    {
+        dotBroker.ProcessCommands();
+    }
+
+    public void DestroyRow(int leftmost, int rightmost, int row)
+    {
+        for (int i = leftmost; i <= rightmost; i++)
+        {
+            Destroy(allDots[i, row]);
+            //Just checks to see if there is 
+            if (row >= height - 1)
+            {
+                CreateDotAtTop(i);
+            }
+        }
+    }
+
+    public void DestroyColumn(int downmost, int upmost, int column)
+    {
+        for (int i = downmost; i <= upmost; i++)
+        {
+            Destroy(allDots[column, i]);
+        }
+
+        if (upmost >= height-1) CreateDotAtTop(column);
+    }
+
+    public void CreateDotAtTop(int column)
+    {
+        int dotInd = Random.Range(0, dots.Length);
+        Vector2 offset = gameObject.transform.position;
+        Vector2 pos = offset + new Vector2(column, height-1);
+        GameObject dot = Instantiate(dots[dotInd], pos, Quaternion.identity);
+        allDots[column, height - 1] = dot;
+    }
 }

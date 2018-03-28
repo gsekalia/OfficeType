@@ -54,6 +54,14 @@
      <Compile Include="Assets\Scripts\Puzzle\BackgroundTile.cs" />
      <Compile Include="Assets\Scripts\Puzzle\Board.cs" />
      <Compile Include="Assets\Scripts\Puzzle\Dot.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\Idle.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\IDotState.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\MoveDown.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\MoveLeft.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\MoveRight.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\MoveUp.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\ReturnToIdle.cs" />
+     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\Selected.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
