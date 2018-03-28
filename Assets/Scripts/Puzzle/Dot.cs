@@ -214,7 +214,7 @@ public class Dot : MonoBehaviour {
         currMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         mousePosAdjusted = currMousePos - offset;
-
+        //CheckMyDragAbove(column, row);
         if (Mathf.Abs((currMousePos.x - offset.x) - startPos.x) > .1f)
         {
             MoveNextGridSpaceX(mousePosAdjusted);
@@ -399,7 +399,9 @@ public class Dot : MonoBehaviour {
 
             while (MouseInd != column)
             {
+                //CheckMyDragAbove(column, row);
                 CalculateAngle(firstTouchPos, finalTouchPos);
+                //CheckMyDragAbove(column, row);
             }
 
             //Update current position marker, don't forget your offset from the center
@@ -606,10 +608,11 @@ public class Dot : MonoBehaviour {
     private void CheckMyDragAbove(int col, int rw)
     {     
         GameObject currDot = board.allDots[col, rw];
+        Dot cDot = currDot.GetComponent<Dot>();
         Vector2 above = new Vector2(col,  rw + 1.0f);
         
         GameObject testDot;
-        if (!isDraggingAbove && above.y < board.height)
+        if (!cDot.isDraggingAbove && above.y < board.height)
         {
             testDot = board.allDots[(int)above.x, (int)above.y];
             if (testDot.tag == currDot.tag)
