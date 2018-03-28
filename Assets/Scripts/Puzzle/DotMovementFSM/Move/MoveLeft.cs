@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class DragLeft : IDotState
+public class MoveLeft : IDotState
 {
 
     public void Action(Dot d)
     {
-        Debug.Log("DRAG LEFT");
-        //d.DragLeftAction();
+        Debug.Log("LEfT");
         d.LeftAction();
     }
 
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
-
-        if(!d.GetCurrentDrag()) next = d.snapState;
-
+        if (!d.GetSelected()) next = d.checkState;
+        else
+        {
+            Vector2 dir = d.GetDirX(); 
+            if (dir.x > .1f) next = d.rightState;
+        }
         return next;
     }
 }

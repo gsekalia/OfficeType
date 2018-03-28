@@ -2,20 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MoveLeft : IDotState
+
+public class DragLeft : IDotState
 {
 
     public void Action(Dot d)
     {
-        Debug.Log("LEfT");
+        Debug.Log("DRAG LEFT");
+        //d.DragLeftAction();
         d.LeftAction();
     }
 
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
-        //if (!d.GetSelected()) next = d.idleState;
-        if (!d.GetSelected()) next = d.checkState;
+
+        if(!d.GetLeftDrag()) next = d.idleState;
+        else if (!d.GetSelected()) next = d.checkState;
+
         return next;
     }
 }

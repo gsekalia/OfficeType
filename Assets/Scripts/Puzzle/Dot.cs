@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class Dot : MonoBehaviour {
 
-    private bool isSelected;
+    public bool isSelected;
     //used for testing matches
     private bool matchFound;
-    private bool wasTested; // delete
 
-    private bool isDraggingAbove;
+
+    public bool isDraggingAbove;
     private bool dragBelow;
 
     public int column;
@@ -43,10 +43,10 @@ public class Dot : MonoBehaviour {
     [HideInInspector] public MoveLeft   leftState;
     [HideInInspector] public MoveRight  rightState;
 
-    //[HideInInspector] public DragUp     upState;
-    //[HideInInspector] public DragDown   downState;
-    [HideInInspector] public DragLeft   dragXState;
-    //[HideInInspector] public DragRight  rightState;
+    [HideInInspector] public DragUp     dragUpState;
+    [HideInInspector] public DragDown   dragDownState;
+    [HideInInspector] public DragLeft   dragLeftState;
+    [HideInInspector] public DragRight  dragRightState;
 
     [HideInInspector] public CheckMatch checkState;
     [HideInInspector] public Fall       fallState;
@@ -62,13 +62,16 @@ public class Dot : MonoBehaviour {
         leftState    = new MoveLeft();
         rightState   = new MoveRight();
 
-        dragXState = new DragLeft();
+
+        dragUpState     = new DragUp();
+        dragDownState   = new DragDown();
+        dragLeftState   = new DragLeft();
+        dragRightState  = new DragRight();
+
 
         checkState   = new CheckMatch();
         fallState    = new Fall();
         snapState    = new SnapBack();
-
-
 
         currState = idleState;
     }
@@ -88,7 +91,6 @@ public class Dot : MonoBehaviour {
         row    = targetY;
         column = targetX;
         isSelected = false;
-        wasTested  = false ;
 
         isDraggingAbove = false;
     }
@@ -100,11 +102,6 @@ public class Dot : MonoBehaviour {
     public void Kill()
     {
         Destroy(board.allDots[column, row]);
-    }
-
-    public bool GetIfTested()
-    {
-        return wasTested;
     }
     //-----------------PASSIVE STATES-------------------------------------------------------------------------
 
@@ -214,7 +211,6 @@ public class Dot : MonoBehaviour {
         currMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         mousePosAdjusted = currMousePos - offset;
-        //CheckMyDragAbove(column, row);
         if (Mathf.Abs((currMousePos.x - offset.x) - startPos.x) > .1f)
         {
             MoveNextGridSpaceX(mousePosAdjusted);
@@ -233,27 +229,41 @@ public class Dot : MonoBehaviour {
     }
     private void OnMouseUp()
     {
-        isSelected = false;
-        ReleaseAboveDrags();
+        //Dont use this, it fucks with the ordering of bool switching
+    }
 
-    }
-    void ReleaseAboveDrags()
+    public bool GetRightDrag()
     {
-        isSelected = false;
-        if (isDraggingAbove)
+        
+        if ((transform.position.x - offset.x) - 0.0f < startPos.x)
         {
+            isSelected = false;
             isDraggingAbove = false;
-            if(row+1 < board.height)
-                board.allDots[column,row+1].GetComponent<Dot>().ReleaseAboveDrags();
         }
-    }
-    public bool GetCurrentDrag()
-    {
         return isSelected;
     }
 
+    public bool GetLeftDrag()
+    {
+
+        if ((transform.position.x - offset.x) + 0.0f > startPos.x)
+        {
+            isSelected = false;
+            isDraggingAbove = false;
+        }
+        return isSelected;
+    }
+
+
+
+
     public bool GetSelected()
     {
+        if (Input.GetMouseButtonUp(0))
+        {
+            isSelected = false;
+            isDraggingAbove = false;
+        }
         return isSelected;
     }
     //---------------------GETTING DIRECTION OF MOVEMENT-------------------------------------------------
@@ -277,9 +287,9 @@ public class Dot : MonoBehaviour {
         // Set to local
         currMousePos -= offset;
         Vector2 move = new Vector2(0, 0);
-        if (Mathf.Abs(currMousePos.x - startPos.x) > .5f)
+        if (Mathf.Abs((currMousePos.x) - startPos.x) > .3f)
         {
-            move = new Vector2(currMousePos.x - startPos.x, 0);
+            move = new Vector2((currMousePos.x - startPos.x), 0);
         }
         //Set Back to world
         currMousePos += offset;
@@ -309,6 +319,12 @@ public class Dot : MonoBehaviour {
 
         MoveNextGridSpaceX(mouseAdjusted);
         transform.position = new Vector2(mouseAdjusted.x + offset.x, startPos.y + offset.y);
+        if (mouseAdjusted.x < currPos.x)
+        {
+            if (!isDraggingAbove) CheckMyDragAbove(column, row);
+            else isDraggingAbove = false;
+        }
+        
 
     }
     public void RightAction()
@@ -320,6 +336,11 @@ public class Dot : MonoBehaviour {
 
         MoveNextGridSpaceX(mouseAdjusted);
         transform.position = new Vector2(mouseAdjusted.x + offset.x, startPos.y + offset.y);
+        if (mouseAdjusted.x > currPos.x)
+        {
+            if (!isDraggingAbove) CheckMyDragAbove(column, row);
+            else isDraggingAbove = false;
+        }
     }
     public void UpAction()
     {
@@ -399,15 +420,12 @@ public class Dot : MonoBehaviour {
 
             while (MouseInd != column)
             {
-                //CheckMyDragAbove(column, row);
                 CalculateAngle(firstTouchPos, finalTouchPos);
-                //CheckMyDragAbove(column, row);
             }
 
             //Update current position marker, don't forget your offset from the center
             currPos = new Vector2(MouseInd, currPos.y);
             board.allDots[(int)currPos.x, (int)currPos.y] = this.gameObject;
-            CheckMyDragAbove(column, row);
         }
 
     }
@@ -618,25 +636,17 @@ public class Dot : MonoBehaviour {
             if (testDot.tag == currDot.tag)
             {
                 Dot tDot = testDot.GetComponent<Dot>();
-                //testDot.GetComponent<Dot>().SetDragXState();
-                //testDot.GetComponent<Dot>().CheckMyDragAbove((int)above.x, (int)above.y);
-
-                tDot.SetDragXState();
+                if      (cDot.currState == cDot.leftState  ||
+                         cDot.currState == cDot.dragLeftState)  tDot.SetDragLeftState();
+                else if (cDot.currState == cDot.rightState ||
+                         cDot.currState == cDot.dragRightState) tDot.SetDragRightState();
+               // tDot.SetDragXState();
                 tDot.CheckMyDragAbove((int)above.x, (int)above.y);
-                currDot.GetComponent<Dot>().isDraggingAbove = true;
+                cDot.isDraggingAbove = true;
 
             }
         }
     }
-    public void SetSelected()
-    {
-        isSelected = true;
-    }
-    public void SetDragAbove()
-    {
-        isDraggingAbove = true;
-    }
-
     private void CheckMyDragBelow(int col, int rw)
     {
         GameObject currDot = board.allDots[col, rw];
@@ -648,18 +658,31 @@ public class Dot : MonoBehaviour {
             testDot = board.allDots[(int)below.x, (int)below.y];
             if (testDot.tag == currDot.tag)
             {
-                testDot.GetComponent<Dot>().SetDragXState();
                 testDot.GetComponent<Dot>().CheckMyDragBelow((int)below.x, (int)below.y);
             }
         }
     }
-    public void SetDragXState()
+
+    public void SetDragLeftState()
     {
-        currState = dragXState;
+        currState = dragLeftState;
         isSelected = true;
     }
-
-
+    public void SetDragRightState()
+    {
+        currState = dragRightState;
+        isSelected = true;
+    }
+    public void SetDragUpState()
+    {
+        currState = dragUpState;
+        isSelected = true;
+    }
+    public void SetDragDownState()
+    {
+        currState = dragDownState;
+        isSelected = true;
+    }
 
 
 

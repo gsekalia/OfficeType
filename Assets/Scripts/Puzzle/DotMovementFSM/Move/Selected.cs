@@ -17,10 +17,6 @@ public class Selected : IDotState
 
         //Figure out which way the players pulling more and go that way
         Vector2 dir = d.GetDir();
-        //Vector2 dirX = d.GetDirX();
-        //Vector2 dirY = d.GetDirX();
-        //dir = dirX;
-        //if (Mathf.Abs(dirX.x) < Mathf.Abs(dirY.y)) dir = dirY;
 
         if (!d.GetSelected())   next = d.idleState;
         else if (dir.x < -.1f)  next = d.leftState;
