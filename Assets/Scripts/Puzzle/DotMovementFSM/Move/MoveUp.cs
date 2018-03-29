@@ -15,8 +15,13 @@ public class MoveUp : IDotState
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
-       // if (!d.GetSelected()) next = d.idleState;
+
         if (!d.GetSelected()) next = d.checkState;
+        else
+        {
+            Vector2 dir = d.GetDirY();
+            if (dir.x < -.1f) next = d.downState;
+        }
         return next;
     }
 

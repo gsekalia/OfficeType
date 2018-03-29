@@ -8,7 +8,7 @@ public class DragDown : IDotState
 
     public void Action(Dot d)
     {
-        Debug.Log("DRAG RIGHT");
+        Debug.Log("DRAG Down");
         d.DownAction();
     }
 
@@ -16,8 +16,8 @@ public class DragDown : IDotState
     {
         IDotState next = this;
 
-        //if (!d.GetDownDrag()) next = d.idleState;
-        //else if (!d.GetSelected()) next = d.checkState;
+        if (!d.GetDownDrag()) next = d.snapState;
+        else if (!d.GetSelected()) next = d.checkState;
 
         return next;
     }

@@ -302,7 +302,6 @@
     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\Passive\Fall.cs" />
     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\Passive\Idle.cs" />
     <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\Passive\SnapBack.cs" />
-    <Compile Include="Assets\Scripts\Puzzle\DotMovementFSM\ReturnToIdle.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
