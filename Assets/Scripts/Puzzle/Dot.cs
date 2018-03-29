@@ -8,6 +8,9 @@ public class Dot : MonoBehaviour {
     //used for testing matches
     private bool matchFound;
 
+    //pointing to next dot.
+    private Dot dAbove;
+
 
     public bool isDraggingAbove;
     private bool dragBelow;
@@ -93,7 +96,10 @@ public class Dot : MonoBehaviour {
         isSelected = false;
 
         isDraggingAbove = false;
+
+        dAbove = null;
     }
+
     void Update()
     {
         currState.Action(this);
@@ -218,8 +224,8 @@ public class Dot : MonoBehaviour {
         {
             MoveNextGridSpaceX(mousePosAdjusted);
             transform.position = new Vector2(currMousePos.x, startPos.y + offset.y);
-            if (!isDraggingAbove) CheckMyDragAbove(column, row);
-            else isDraggingAbove = false;
+            CheckMyDragAbove(column, row);
+            
         }
 
         else if (Mathf.Abs((currMousePos.y - offset.y) - startPos.y) > .1f)
@@ -239,7 +245,6 @@ public class Dot : MonoBehaviour {
 
     public bool GetRightDrag()
     {
-
         if ((transform.position.x - offset.x) - 0.0f < startPos.x)
         {
             isSelected = false;
@@ -257,7 +262,6 @@ public class Dot : MonoBehaviour {
         }
         return isSelected;
     }
-
 
     public bool GetSelected()
     {
@@ -331,8 +335,7 @@ public class Dot : MonoBehaviour {
         transform.position = new Vector2(mouseAdjusted.x + offset.x, startPos.y + offset.y);
         if (mouseAdjusted.x < currPos.x)
         {
-            if (!isDraggingAbove) CheckMyDragAbove(column, row);
-            else isDraggingAbove = false;
+            CheckMyDragAbove(column, row);
         }
         
 
@@ -348,8 +351,8 @@ public class Dot : MonoBehaviour {
         transform.position = new Vector2(mouseAdjusted.x + offset.x, startPos.y + offset.y);
         if (mouseAdjusted.x > currPos.x)
         {
-            if (!isDraggingAbove) CheckMyDragAbove(column, row);
-            else isDraggingAbove = false;
+            CheckMyDragAbove(column, row);
+
         }
     }
     public void UpAction()
@@ -430,7 +433,9 @@ public class Dot : MonoBehaviour {
 
             while (MouseInd != column)
             {
+
                 CalculateAngle(firstTouchPos, finalTouchPos);
+                //CheckMyDragAbove(column, row);
             }
 
             //Update current position marker, don't forget your offset from the center
@@ -621,11 +626,6 @@ public class Dot : MonoBehaviour {
 
     //------------------DRAG STATES----------------------------------------------
 
-    public void DragLeftAction()
-    {
-
-    }
-
     enum DRAG_DIR
     {   LEFT,
         RIGHT,
@@ -640,22 +640,37 @@ public class Dot : MonoBehaviour {
         Vector2 above = new Vector2(col,  rw + 1.0f);
         
         GameObject testDot;
-        if (!cDot.isDraggingAbove && above.y < board.height)
+        if (above.y < board.height)
         {
             testDot = board.allDots[(int)above.x, (int)above.y];
             if (testDot.tag == currDot.tag)
             {
                 Dot tDot = testDot.GetComponent<Dot>();
-                if      (cDot.currState == cDot.leftState  ||
-                         cDot.currState == cDot.dragLeftState)  tDot.SetDragLeftState();
+                if (cDot.currState == cDot.leftState ||
+                    cDot.currState == cDot.dragLeftState)
+                    tDot.SetDragLeftState();
+                
                 else if (cDot.currState == cDot.rightState ||
-                         cDot.currState == cDot.dragRightState) tDot.SetDragRightState();
-               // tDot.SetDragXState();
-                tDot.CheckMyDragAbove((int)above.x, (int)above.y);
-                cDot.isDraggingAbove = true;
+                         cDot.currState == cDot.dragRightState)
+                    tDot.SetDragRightState();
 
+                else if (cDot.currState == cDot.selState)
+                    tDot.SetDragRightState();
+
+                tDot.CheckMyDragAbove((int)above.x, (int)above.y);
+                //testDot.transform.position =
+                //    new Vector2(currDot.transform.position.x,
+                //    testDot.transform.position.y);
+
+                cDot.isDraggingAbove = true;
             }
+            else if(testDot.tag != currDot.tag)
+            {
+                cDot.isDraggingAbove = false;
+            }
+            
         }
+        
     }
     private void CheckMyDragBelow(int col, int rw)
     {

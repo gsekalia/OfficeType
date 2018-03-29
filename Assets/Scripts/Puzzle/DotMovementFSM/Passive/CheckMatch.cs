@@ -10,7 +10,6 @@ public class CheckMatch : IDotState
  
         d.CheckAction();
     }
-
     public IDotState GetNextState(Dot d)
     {
         IDotState next = d.idleState;
