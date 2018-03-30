@@ -19,7 +19,10 @@ public class MoveRight : IDotState
         else
         {
             Vector2 dir = d.GetDirX();
-            if (dir.x < -.1f) next = d.leftState;
+            if (dir.x < -.1f)
+            {
+                next = d.leftState;
+            }
 
         }
         return next;

@@ -8,7 +8,7 @@ public class MoveDown : IDotState
 
     public void Action(Dot d)
     {
-        Debug.Log("DOWN");
+        Debug.Log("MOVE DOWN");
         d.DownAction();
     }
 

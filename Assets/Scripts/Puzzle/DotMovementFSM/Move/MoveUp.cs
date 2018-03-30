@@ -20,7 +20,7 @@ public class MoveUp : IDotState
         else
         {
             Vector2 dir = d.GetDirY();
-            if (dir.x < -.1f) next = d.downState;
+            if (dir.y < -.1f) next = d.downState;
         }
         return next;
     }
