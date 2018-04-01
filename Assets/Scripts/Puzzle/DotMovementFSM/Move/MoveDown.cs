@@ -15,7 +15,12 @@ public class MoveDown : IDotState
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
-        if (!d.GetSelected()) next = d.checkState;
+        if (!d.GetSelected())
+        {
+            d.DetachFromLeft();
+            d.DetachFromRight();
+            next = d.checkState;
+        }
         else
         {
             Vector2 dir = d.GetDirY();

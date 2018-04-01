@@ -26,7 +26,8 @@ public class Dot : MonoBehaviour {
     private Vector2 offset;
 
     private Vector2 currMousePos;
-    private Vector2 mousePosAdjusted;
+    public Vector2 MouseToPrint;
+    //private Vector2 mousePosAdjusted;
 
     private Board board;
     //private GameObject otherDot;
@@ -37,7 +38,18 @@ public class Dot : MonoBehaviour {
     public float indOff = 0.5f;
     public float followSpeed = 0.0014f;
 
+    public Dot dAbove;
+    public Dot dBelow;
+    public Dot dLeft;
+    public Dot dRight;
 
+
+    public Dot dPrevAbove;
+    public Dot dPrevBelow;
+    public Dot dPrevLeft;
+    public Dot dPrevRight;
+
+    //Dot dPrev; // used specifically for dragged dots
 
     public IDotState currState;
 
@@ -101,15 +113,25 @@ public class Dot : MonoBehaviour {
         isDraggingBelow = false;
         isDraggingLeft  = false;
         isDraggingRight = false;
-        followSpeed = 0.15f;
-       // dotBelow = null;
+        followSpeed = 0.25f;
+        // dotBelow = null;
+        dAbove = null;
+        dBelow = null;
+        dLeft = null;
+        dRight = null;
+
+        dPrevAbove = null;
+        dPrevBelow = null;
+        dPrevLeft = null;
+        dPrevRight = null;
+        MouseToPrint = new Vector2(0, 0);
     }
 
     void Update()
     {
         currState.Action(this);
         currState = currState.GetNextState(this);
-        gameObject.name = "[ " + column + ", " + row + "]" ;
+        gameObject.name = "[ " + column + ", " + row + "]";
     }
     public void Kill()
     {
@@ -224,19 +246,28 @@ public class Dot : MonoBehaviour {
     {
         currMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        mousePosAdjusted = currMousePos - offset;
+        Vector2 mouseAdjusted = currMousePos - offset;
+        Vector2 DotPos = (Vector2)transform.position - offset;
+
+        mouseAdjusted.x = Mathf.Clamp(mouseAdjusted.x, 0.0f, board.width - 1);
+        mouseAdjusted.x = Mathf.Clamp(mouseAdjusted.x, DotPos.x - followSpeed, DotPos.x + followSpeed);
+
+        mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, 0.0f, board.height - 1);
+        mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, DotPos.y - followSpeed, DotPos.y + followSpeed);
+
+        //mousePosAdjusted = currMousePos - offset;
         if (Mathf.Abs((currMousePos.x - offset.x) - startPos.x) > .1f)
         {
-            MoveNextGridSpaceX(mousePosAdjusted);
+            MoveNextGridSpaceX(mouseAdjusted);
             transform.position = new Vector2(currMousePos.x, startPos.y + offset.y);
-            CheckMyDragAbove(column, row);
-            CheckMyDragBelow(column, row);
+            //CheckMyDragAbove(column, row);
+            //CheckMyDragBelow(column, row);
 
         }
 
         else if (Mathf.Abs((currMousePos.y - offset.y) - startPos.y) > .1f)
         {
-            MoveNextGridSpaceY(mousePosAdjusted);
+            MoveNextGridSpaceY(mouseAdjusted);
             transform.position = new Vector2(startPos.x + offset.x, currMousePos.y);
         }
     }
@@ -254,60 +285,116 @@ public class Dot : MonoBehaviour {
         if (Input.GetMouseButtonUp(0))
         {
             isSelected = false;
-
-            isDraggingAbove = false;
-            isDraggingBelow = false;
-            isDraggingLeft = false;
-            isDraggingRight = false;
         }
-        //else
-        //{
-        //    isSelected = true;
-        //}
         return isSelected;
+    }
+    public void SetDeselected()
+    {
+        isSelected = false;
     }
 
     //--------------------DRAG STATES-----------------------------------------------------------
     public bool GetRightDrag()
     {
-        if ((transform.position.x - offset.x) - 0.2f < startPos.x)
+        bool result = true;
+        if ((transform.position.x - offset.x) - 0.0f < startPos.x)
         {
-            isSelected = false;
-            isDraggingAbove = false;
-            isDraggingBelow = false;
+            result = false;
+
         }
-        return isSelected;
+        return result;
     }
     public bool GetLeftDrag()
     {
-        if ((transform.position.x - offset.x) + 0.2f > startPos.x)
+        bool result = true;
+        if ((transform.position.x - offset.x) + 0.0f > startPos.x)
         {
-            isSelected = false;
-            isDraggingAbove = false;
-            isDraggingBelow = false;
+            result = false;
         }
-        return isSelected;
+
+        return result;
     }
     public bool GetUpDrag()
     {
-        if ((transform.position.y - offset.y) - 0.2f < startPos.y)
+        bool result = true;
+        if ((transform.position.y - offset.y) - 0.0f < startPos.y)
         {
-            isSelected = false;
-            isDraggingLeft = false;
-            isDraggingRight = false;
+            result = false;
         }
-        return isSelected;
+        return result;
     }
     public bool GetDownDrag()
     {
-        if ((transform.position.y - offset.y) + 0.2f > startPos.y)
+        bool result = true;
+        if ((transform.position.y - offset.y) + 0.0f > startPos.y)
         {
-            isSelected = false;
-            isDraggingLeft = false;
-            isDraggingRight = false;
+            result = false;
         }
-        
-        return isSelected;
+        return result;
+    }
+
+
+    //---------------------Detach Methods-------------------------------------------------
+
+    public void DetachFromPrev()
+    {
+        Debug.Log("Detached Prev");
+        if (dPrevBelow != null)
+        {
+            dPrevBelow.SetAboveDot(null);
+        }
+        if (dPrevAbove != null)
+        {
+            dPrevAbove.SetBelowDot(null);
+        }
+        if (dPrevLeft != null)
+        {
+            dPrevLeft.SetRightDot(null);
+        }
+        if (dPrevRight != null)
+        {
+            dPrevRight.SetLeftDot(null);
+        }
+        dPrevBelow = null;
+        dPrevAbove = null;
+        dPrevLeft = null;
+        dPrevRight = null;
+    }
+    public void DetachFromAbove()
+    {
+        //Debug.Log("Detached Above");
+        if (dAbove != null)
+        {
+            dAbove.SetPrevBelow(null);
+        }
+        dAbove = null;
+    }
+    public void DetachFromBelow()
+    {
+        //Debug.Log("Detached Above");
+        if (dBelow != null)
+        {
+            dBelow.SetPrevAbove(null);
+        }
+        dBelow = null;
+    }
+    public void DetachFromLeft()
+    {
+        //Debug.Log("Detached Above");
+        if (dLeft != null)
+        {
+            dLeft.SetPrevRight(null);
+        }
+        dLeft = null;
+    }
+    public void DetachFromRight()
+    {
+        //Debug.Log("Detached Above");
+        if (dRight != null)
+        {
+            dRight.SetPrevLeft(null);
+        }
+        dRight = null;
     }
 
 
@@ -329,28 +416,25 @@ public class Dot : MonoBehaviour {
     }
     public Vector2 GetDirX()
     {
-        // Set to local
-        currMousePos -= offset;
+        Vector2 DotPos = (Vector2)transform.position - offset;
+
         Vector2 move = new Vector2(0, 0);
-        if (Mathf.Abs(currMousePos.x - startPos.x) > .3f)
+        if (Mathf.Abs(DotPos.x - startPos.x) > .1f)
         {
-            move = new Vector2((currMousePos.x - startPos.x), 0);
+            move = new Vector2((DotPos.x - startPos.x), 0);
         }
-        //Set Back to world
-        currMousePos += offset;
         return move;
     }
     public Vector2 GetDirY()
     {
-        // Set to local
-        currMousePos -= offset;
+
+        Vector2 DotPos = (Vector2)transform.position - offset;
+
         Vector2 move = new Vector2(0, 0);
-        if (Mathf.Abs(currMousePos.y - startPos.y) > .3f)
+        if (Mathf.Abs(DotPos.y - startPos.y) > .1f)
         {
-            move = new Vector2(0, currMousePos.y - startPos.y);
+            move = new Vector2(0, DotPos.y - startPos.y);
         }
-        //Set Back to world
-        currMousePos += offset;
         return move;
     }
 
@@ -366,9 +450,9 @@ public class Dot : MonoBehaviour {
         MoveNextGridSpaceX(mouseAdjusted);
         if (mouseAdjusted.x < currPos.x)
         {
-            CheckMyDragAbove(column, row);
-            CheckMyDragBelow(column, row);
-        }      
+            if (dAbove == null) CheckMyDragAbove(column, row);
+            if (dBelow == null) CheckMyDragBelow(column, row);
+        }
     }
     public void RightAction()
     {
@@ -378,25 +462,26 @@ public class Dot : MonoBehaviour {
 
         mouseAdjusted.x = Mathf.Clamp(mouseAdjusted.x, 0.0f, board.width-1);
         mouseAdjusted.x = Mathf.Clamp(mouseAdjusted.x, DotPos.x - followSpeed, DotPos.x + followSpeed);
-        MoveNextGridSpaceX(mouseAdjusted);      
+        MoveNextGridSpaceX(mouseAdjusted);
         if (mouseAdjusted.x > currPos.x)
         {
-            CheckMyDragAbove(column, row);
-            CheckMyDragBelow(column, row);
-
+            if (dAbove == null) CheckMyDragAbove(column, row);
+            if (dBelow == null) CheckMyDragBelow(column, row);
         }
     }
     public void UpAction()
     {
         currMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 mouseAdjusted = currMousePos - offset;
-        mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, 0.0f, board.height - 1);
+        Vector2 DotPos = (Vector2)transform.position - offset;
 
+        mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, 0.0f, board.height - 1);
+        mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, DotPos.y - followSpeed, DotPos.y + followSpeed);
         MoveNextGridSpaceY(mouseAdjusted);
         if (mouseAdjusted.y > currPos.y)
         {
-            CheckMyDragLeft(column, row);
-            CheckMyDragRight(column, row);
+            if (dLeft  == null) CheckMyDragLeft(column, row);
+            if (dRight == null) CheckMyDragRight(column, row);
         }
     }
     public void DownAction()
@@ -407,12 +492,12 @@ public class Dot : MonoBehaviour {
 
         //mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, 0.0f, board.height - 1);
         mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, 0.0f, board.height - 1);
-        //mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, DotPos.y - 1, DotPos.y + 1);
+        mouseAdjusted.y = Mathf.Clamp(mouseAdjusted.y, DotPos.y - followSpeed, DotPos.y + followSpeed);
         MoveNextGridSpaceY(mouseAdjusted);
         if (mouseAdjusted.y < currPos.y)
         {
-            CheckMyDragLeft(column, row);
-            CheckMyDragRight(column, row);
+            if (dLeft  == null) CheckMyDragLeft(column, row);
+            if (dRight == null) CheckMyDragRight(column, row);
         }
     }
 
@@ -450,8 +535,19 @@ public class Dot : MonoBehaviour {
         else if (swipeAngle > 45 && swipeAngle <= 135 && row < board.height - 1)
         {
             otherDot = board.allDots[column, row + 1];
-            otherDot.GetComponent<Dot>().row -= 1;
-            row += 1;
+            if (otherDot != gameObject)
+            {
+                board.allDots[column, row + 1] = gameObject;
+                board.allDots[column, row] = otherDot;
+
+                otherDot.GetComponent<Dot>().row -= 1;
+                row += 1;
+            }
+            else skipMove = true;
+
+            //otherDot = board.allDots[column, row + 1];
+            //otherDot.GetComponent<Dot>().row -= 1;
+            //row += 1;
         }
         //LEFT SWIPE
         else if ((swipeAngle > 135 || swipeAngle <= -135) && column > 0)
@@ -475,8 +571,19 @@ public class Dot : MonoBehaviour {
         else if (swipeAngle < -45 && swipeAngle >= -135 && row > 0)
         {
             otherDot = board.allDots[column, row - 1];
-            otherDot.GetComponent<Dot>().row += 1;
-            row -= 1;
+            if (otherDot != gameObject)
+            {
+                board.allDots[column, row - 1] = gameObject;
+                board.allDots[column, row] = otherDot;
+
+                otherDot.GetComponent<Dot>().row += 1;
+                row -= 1;
+            }
+            else skipMove = true;
+
+            //otherDot = board.allDots[column, row - 1];
+            //otherDot.GetComponent<Dot>().row += 1;
+            //row -= 1;
         }
         else skipMove = true;
 
@@ -495,11 +602,7 @@ public class Dot : MonoBehaviour {
 
             while (MouseInd != column && !skipMove)
             {
-                if (!isDraggingAbove) CheckMyDragAbove(column, row);
-                if (!isDraggingBelow) CheckMyDragBelow(column, row);
-
                 CalculateAngle(firstTouchPos, finalTouchPos);
-                //if( skipMove = true);
             }
             if (skipMove) Debug.Log("Misfire");
             skipMove = false;
@@ -509,7 +612,7 @@ public class Dot : MonoBehaviour {
         }
 
         transform.position = new Vector2(MousePos.x, startPos.y) + offset;
-
+        MouseToPrint = MousePos;
 
     }
     void MoveNextGridSpaceY(Vector2 MousePos)
@@ -519,31 +622,27 @@ public class Dot : MonoBehaviour {
         //Check to see if in new gridspace
         if (Mathf.Abs(MouseInd - (int)currPos.y) > .1f)
         {
-            Vector2 finalTouchPos = new Vector2(0.0f, MousePos.y);
+            Vector2 finalTouchPos = new Vector2(0.0f, MouseInd);
             Vector2 firstTouchPos = new Vector2(0.0f, currPos.y);
 
-            transform.position = new Vector2(startPos.x, MousePos.y) + offset;
-            while (MouseInd != row)
+            while (MouseInd != row && !skipMove)
             {
-                if (!isDraggingLeft)
-                {
-                    CheckMyDragLeft(column, row);
-                }
-                if (!isDraggingRight)
-                {
-                    CheckMyDragRight(column, row);
-                }               
+           
                 CalculateAngle(firstTouchPos, finalTouchPos);
             }
+            if (skipMove) Debug.Log("Misfire");
+            skipMove = false;
+
             currPos = new Vector2(currPos.x, MouseInd);
             board.allDots[(int)currPos.x, (int)currPos.y] = this.gameObject;
         }
 
         transform.position = new Vector2(startPos.x, MousePos.y) + offset;
+        MouseToPrint = MousePos;
     }
 
 
-    //----------------------MATCHING STATE--------------------------------------------------------------
+    //--------------------------------MATCHING STATE--------------------------------------------------------------
     public void CheckAction()
     {
         matchFound = false;
@@ -563,7 +662,7 @@ public class Dot : MonoBehaviour {
     {
         return matchFound;
     }
-    //----------------MATCH SINGLE TARGET-------------------------------
+    //------------------------------MATCH SINGLE TARGET-------------------------------
     public bool MatchHorizontally(int col, int rw)
     {
         bool matchExists = false;
@@ -702,14 +801,7 @@ public class Dot : MonoBehaviour {
         return matchExists;
     }
 
-    //------------------DRAG STATES----------------------------------------------
-
-    enum DRAG_DIR
-    {   LEFT,
-        RIGHT,
-        UP,
-        DOWN,
-        NONE};
+    //--------------------------------DRAG STATES----------------------------------------------
     //Check if the above and below are matching the selected, if so, drag those fuckers
     private void CheckMyDragAbove(int col, int rw)
     {
@@ -724,30 +816,25 @@ public class Dot : MonoBehaviour {
         {
             testDot = board.allDots[(int)above.x, (int)above.y];
             Dot tDot = testDot.GetComponent<Dot>();
+
             if (testDot.tag == currDot.tag && !tDot.isSelected)
             {
-                if (cDot.currState == cDot.leftState ||
-                    cDot.currState == cDot.dragLeftState)
+                if ((cDot.currState == cDot.leftState ||
+                    cDot.currState == cDot.dragLeftState))
+                {
                     tDot.SetDragLeftState();
-                
-                else if (cDot.currState == cDot.rightState ||
-                         cDot.currState == cDot.dragRightState)
+                }
+                else if ((cDot.currState == cDot.rightState ||
+                         cDot.currState == cDot.dragRightState) )
                     tDot.SetDragRightState();
 
                 else if (cDot.currState == cDot.selState)
                     tDot.SetDragRightState();
 
-                testDot.transform.position =
-                    currDot.transform.position + new Vector3(0, 1, 0);
-                tDot.isDraggingBelow = true;
                 tDot.CheckMyDragAbove((int)above.x, (int)above.y);
-                cDot.isDraggingAbove = true;
-            }
-            else if(testDot.tag != currDot.tag)
-            {
-                cDot.isDraggingAbove = false;
-            }
-            
+                tDot.SetPrevBelow(cDot);
+                cDot.SetAboveDot(tDot);              
+            }            
         }
         
     }
@@ -766,31 +853,21 @@ public class Dot : MonoBehaviour {
             Dot tDot = testDot.GetComponent<Dot>();
             if (testDot.tag == currDot.tag && !tDot.isSelected)
             {
-               // Debug.Log("Drag Match");
-                //Dot tDot = testDot.GetComponent<Dot>();
-                if (cDot.currState == cDot.leftState ||
-                    cDot.currState == cDot.dragLeftState)
-                    tDot.SetDragLeftState();
+                if (    cDot.currState == cDot.leftState ||
+                        cDot.currState == cDot.dragLeftState)
+                        tDot.SetDragLeftState();
 
-                else if (cDot.currState == cDot.rightState ||
-                         cDot.currState == cDot.dragRightState)
-                    tDot.SetDragRightState();
+                else if (   cDot.currState == cDot.rightState ||
+                            cDot.currState == cDot.dragRightState)
+                            tDot.SetDragRightState();
 
-                else if (cDot.currState == cDot.selState)
-                    tDot.SetDragRightState();
+                else if (   cDot.currState == cDot.selState)
+                            tDot.SetDragRightState();
 
-                testDot.transform.position =
-                    currDot.transform.position + new Vector3(0, -1, 0);
-                tDot.isDraggingAbove = true;
                 tDot.CheckMyDragBelow((int)below.x, (int)below.y);
-
-                cDot.isDraggingBelow = true;
+                tDot.SetPrevAbove(cDot);
+                cDot.SetBelowDot(tDot);
             }
-            else if (testDot.tag != currDot.tag)
-            {
-                cDot.isDraggingBelow = false;
-            }
-
         }
     }
     private void CheckMyDragLeft(int col, int rw)
@@ -808,8 +885,6 @@ public class Dot : MonoBehaviour {
             Dot tDot = testDot.GetComponent<Dot>();
             if (testDot.tag == currDot.tag && !tDot.isSelected)
             {
-                // Debug.Log("Drag Match");
-                //Dot tDot = testDot.GetComponent<Dot>();
                 if (cDot.currState == cDot.upState ||
                     cDot.currState == cDot.dragUpState)
                     tDot.SetDragUpState();
@@ -821,20 +896,13 @@ public class Dot : MonoBehaviour {
                 else if (cDot.currState == cDot.selState)
                     tDot.SetDragUpState();
 
-                testDot.transform.position =
-                    currDot.transform.position + new Vector3(-1, 0, 0);
                 tDot.CheckMyDragLeft((int)left.x, (int)left.y);
-
-                cDot.isDraggingLeft = true;
-            }
-            else if (testDot.tag != currDot.tag)
-            {
-                cDot.isDraggingLeft = false;
+                tDot.SetPrevRight(cDot);
+                cDot.SetLeftDot(tDot);
             }
 
         }
     }
-
     private void CheckMyDragRight(int col, int rw)
     {
         GameObject currDot;// = board.allDots[col, rw];
@@ -861,16 +929,17 @@ public class Dot : MonoBehaviour {
                 else if (cDot.currState == cDot.selState)
                     tDot.SetDragUpState();
 
-                testDot.transform.position =
-                    currDot.transform.position + new Vector3(1, 0, 0);
+                //testDot.transform.position =
+                //    currDot.transform.position + new Vector3(1, 0, 0);
                 tDot.CheckMyDragRight((int)right.x, (int)right.y);
-
-                cDot.isDraggingRight = true;
+                tDot.SetPrevLeft(cDot);
+                cDot.SetRightDot(tDot);
+               // cDot.isDraggingRight = true;
             }
-            else if (testDot.tag != currDot.tag)
-            {
-                cDot.isDraggingRight = false;
-            }
+            //else if (testDot.tag != currDot.tag)
+            //{
+            //    cDot.isDraggingRight = false;
+            //}
 
         }
     }
@@ -896,12 +965,60 @@ public class Dot : MonoBehaviour {
         currState = dragDownState;
         isSelected = true;
     }
+    //--------------------------------SET DRAG REFERENCES----------------------------------
+    public void NullOutPrevDot()
+    {
+        //Debug.Log("Null out Prev dot");
+        dPrevBelow = null;
+        dPrevAbove = null;
+        dPrevLeft  = null;
+        dPrevRight = null;
+    }
+    public void NullOutMyDot()
+    {
+        //Debug.Log("Null out all dot");
+        dBelow = null;
+        dAbove = null;
+        dLeft = null;
+        dRight = null;
+    }
+
+    public void SetAboveDot(Dot pDot)
+    {
+        //Debug.Log("Setting Above dot");
+        dAbove = pDot;
+    }
+    public void SetBelowDot(Dot pDot)
+    {
+        dBelow = pDot;
+    }
+    public void SetLeftDot(Dot pDot)
+    {
+        //Debug.Log("Setting Above dot");
+        dLeft = pDot;
+    }
+    public void SetRightDot(Dot pDot)
+    {
+        dRight = pDot;
+    }
 
 
-    //public void SetBelowDot(Dot pDot)
-    //{
-    //    dotBelow = pDot;
-    //}
+    public void SetPrevAbove(Dot pDot)
+    {
+        dPrevAbove = pDot;
+    }
+    public void SetPrevBelow(Dot pDot)
+    {
+        dPrevBelow = pDot;
+    }
+    public void SetPrevLeft(Dot pDot)
+    {
+        dPrevLeft = pDot;
+    }
+    public void SetPrevRight(Dot pDot)
+    {
+        dPrevRight = pDot;
+    }
 
 
 }

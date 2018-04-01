@@ -8,21 +8,29 @@ public class DragLeft : IDotState
 
     public void Action(Dot d)
     {
-        Debug.Log("DRAG LEFT");
-        //d.DragLeftAction();
-        d.LeftAction();
+        if (d.GetLeftDrag() && d.GetSelected())
+        {
+            Debug.Log("DRAG LEFT");
+            d.LeftAction();
+        }
     }
 
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
 
-        if (!d.GetLeftDrag()) next = d.snapState;
+        if (!d.GetLeftDrag())
+        {
+            d.DetachFromPrev();
+            d.SetDeselected();
+
+            next = d.snapState;
+        }
         else if (!d.GetSelected())
         {
+            d.DetachFromPrev();
             next = d.checkState;
         }
-
         return next;
     }
 }

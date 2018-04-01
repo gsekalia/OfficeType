@@ -13,8 +13,9 @@ public class SnapBack : IDotState
 
     public IDotState GetNextState(Dot d)
     {
+        d.NullOutPrevDot();
+        d.NullOutMyDot();
 
-        // Debug.Log("IDLE")
         IDotState next = this;
        
         if (d.CheckIfAtStartPosition()) next = d.idleState;

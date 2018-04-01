@@ -8,15 +8,23 @@ public class MoveUp : IDotState
 
     public void Action(Dot d)
     {
-        Debug.Log("MoveUp");
-        d.UpAction();
+        if (d.GetSelected())
+        {
+            Debug.Log("MoveUp");
+            d.UpAction();
+        }
     }
 
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
 
-        if (!d.GetSelected()) next = d.checkState;
+        if (!d.GetSelected())
+        {
+            d.DetachFromLeft();
+            d.DetachFromRight();
+            next = d.checkState;
+        }
         else
         {
             Vector2 dir = d.GetDirY();

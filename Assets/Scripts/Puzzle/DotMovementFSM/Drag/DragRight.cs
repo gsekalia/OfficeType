@@ -7,16 +7,26 @@ public class DragRight : IDotState
 {
     public void Action(Dot d)
     {
-        Debug.Log("DRAG RIGHT");
-        d.RightAction();
+        if (d.GetRightDrag() && d.GetSelected())
+        {
+            Debug.Log("DRAG RIGHT");
+            d.RightAction();
+        }
     }
     public IDotState GetNextState(Dot d)
     {
         IDotState next = this;
 
-        if (!d.GetRightDrag()) next = d.snapState;
+        if (!d.GetRightDrag())
+        {
+            d.DetachFromPrev();
+            d.SetDeselected();
+
+            next = d.snapState;
+        }
         else if (!d.GetSelected())
         {
+            d.DetachFromPrev();
             next = d.checkState;
         }
 

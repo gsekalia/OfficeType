@@ -52,7 +52,12 @@ public class Board : MonoBehaviour {
         }
     }
 
- 
+    private void Update()
+    {
+    }
+
+
+
     //public void AddCommand(DotCommand cmd)
     //{
     //    //dotBroker.AddObject();
