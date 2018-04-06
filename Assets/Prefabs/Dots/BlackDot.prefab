@@ -68,15 +68,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae7133376250a7944a3af91e452ff1d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSelected: 0
+  skipMove: 0
+  isDraggingAbove: 0
+  isDraggingBelow: 0
+  isDraggingLeft: 0
+  isDraggingRight: 0
   column: 0
   row: 0
   targetX: 0
   targetY: 0
   startPos: {x: 0, y: 0}
-  TempPos: {x: 0, y: 0}
-  offset: {x: 0, y: 0}
+  currPos: {x: 0, y: 0}
+  prevPos: {x: 0, y: 0}
+  MouseToPrint: {x: 0, y: 0}
   swipeAngle: 0
   indOff: 0.5
+  followSpeed: 0.0014
+  dAbove: {fileID: 0}
+  dBelow: {fileID: 0}
+  dLeft: {fileID: 0}
+  dRight: {fileID: 0}
+  dPrevAbove: {fileID: 0}
+  dPrevBelow: {fileID: 0}
+  dPrevLeft: {fileID: 0}
+  dPrevRight: {fileID: 0}
 --- !u!212 &212084212665696686
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -36,6 +36,9 @@ public class Dot : MonoBehaviour {
 
     //used for  offseting the position of the dot and when it will move.
     public float indOff = 0.5f;
+    public float indSpacing = 4.0f;
+
+
     public float followSpeed = 0.0014f;
 
     public Dot dAbove;
@@ -114,7 +117,7 @@ public class Dot : MonoBehaviour {
         isDraggingLeft  = false;
         isDraggingRight = false;
         followSpeed = 0.25f;
-        // dotBelow = null;
+
         dAbove = null;
         dBelow = null;
         dLeft = null;
@@ -137,6 +140,24 @@ public class Dot : MonoBehaviour {
     {
         Destroy(board.allDots[column, row]);
     }
+
+    public Vector2 GetRealPosFromGrid(Vector2 vect)
+    {
+        //return new Vector2(vect.x / indOff, vect.y /indOff);
+        //indSpacing;
+        float indSpacingHalf = indSpacing / 2;
+        return new Vector2((indSpacing * (vect.x)) + indSpacingHalf, (indSpacing * (vect.y)) + indSpacingHalf);
+    }
+
+
+    public Vector2 GetGridPosFromReal(Vector2 vect)
+    {
+        //float indSpacing = 2;
+        float indSpacingHalf = indSpacing / 2;
+        //  PUT IN THE OFFSET, DINGUS
+        return new Vector2((vect.x - indSpacingHalf)/indSpacing, (vect.y - indSpacingHalf) / indSpacing);
+    }
+
     //-----------------PASSIVE STATES-------------------------------------------------------------------------
 
     public void IdleAction()
@@ -144,36 +165,74 @@ public class Dot : MonoBehaviour {
         targetX = column;
         targetY = row;
 
-        Vector2 TempPos = new Vector2(targetX + offset.x, transform.position.y);
-        if (Mathf.Abs(targetX - (transform.position.x - offset.x)) > .1f)
+        Vector2 gridPos = GetGridPosFromReal(transform.position);
+        //Vector2 TempPos = new Vector2(targetX + offset.x, transform.position.y);
+   
+        Vector2 TempPos = new Vector2(targetX + offset.x, gridPos.y);
+        Vector2 realTempPos = GetRealPosFromGrid(TempPos);
+        if (Mathf.Abs(targetX - (gridPos.x)) > .1f)
         {
             //Move towards curr
-            transform.position = Vector2.Lerp(transform.position, TempPos, .4f);
+            transform.position = Vector2.Lerp(transform.position, realTempPos, .4f);
         }
         else
         {
             //Set Position         
-            transform.position = TempPos;
+            transform.position = realTempPos;
             currPos = TempPos - offset;
             startPos = currPos;
             board.allDots[column, row] = this.gameObject;
         }
 
 
-        TempPos = new Vector2(transform.position.x, targetY + offset.y);
-        if (Mathf.Abs(targetY - (transform.position.y - offset.y)) > .1f)
+        TempPos = new Vector2(gridPos.x, targetY + offset.y);
+        realTempPos = GetRealPosFromGrid(TempPos);
+
+        if (Mathf.Abs(targetY - (gridPos.y)) > .1f)
         {
             //Move towards curr         
-            transform.position = Vector2.Lerp(transform.position, TempPos, .4f);
+            transform.position = Vector2.Lerp(transform.position, realTempPos, .4f);
         }
         else
         {
             //Set Position
-            transform.position = TempPos;
+            transform.position = realTempPos;
             currPos = TempPos - offset;
             startPos = currPos;
             board.allDots[column, row] = this.gameObject;
         }
+
+        //Vector2 TempPos = new Vector2(targetX + offset.x, transform.position.y);
+        //// Vector2 TempPos = new Vector2(targetX + indOff + offset.x, transform.position.y);
+        // if (Mathf.Abs(targetX - (transform.position.x - offset.x)) > .1f)
+        // {
+        //     //Move towards curr
+        //     transform.position = Vector2.Lerp(transform.position, TempPos, .4f);
+        // }
+        // else
+        // {
+        //     //Set Position         
+        //     transform.position = TempPos;
+        //     currPos = TempPos - offset;
+        //     startPos = currPos;
+        //     board.allDots[column, row] = this.gameObject;
+        // }
+
+
+        // TempPos = new Vector2(transform.position.x, targetY + offset.y);
+        // if (Mathf.Abs(targetY - (transform.position.y - offset.y)) > .1f)
+        // {
+        //     //Move towards curr         
+        //     transform.position = Vector2.Lerp(transform.position, TempPos, .4f);
+        // }
+        // else
+        // {
+        //     //Set Position
+        //     transform.position = TempPos;
+        //     currPos = TempPos - offset;
+        //     startPos = currPos;
+        //     board.allDots[column, row] = this.gameObject;
+        // }
 
     }
     //--------------FALLING---------------------------------

@@ -55,9 +55,6 @@ public class Board : MonoBehaviour {
     private void Update()
     {
     }
-
-
-
     //public void AddCommand(DotCommand cmd)
     //{
     //    //dotBroker.AddObject();
@@ -103,6 +100,7 @@ public class Board : MonoBehaviour {
         int dotInd = Random.Range(0, dots.Length);
         Vector2 offset = gameObject.transform.position;
         Vector2 pos = offset + new Vector2(column, height-1);
+       // Vector2 pos = offset + new Vector2(column, height);
         GameObject dot = Instantiate(dots[dotInd], pos, Quaternion.identity);
         allDots[column, height - 1] = dot;
     }

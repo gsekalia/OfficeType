@@ -12,6 +12,14 @@ TagManager:
   - Salmon Dot
   - Teal Dot
   - Yellow Dot
+  - PinkIcon
+  - BlueIcon
+  - GreenIcon
+  - OrangeIcon
+  - PurpleIcon
+  - RedIcon
+  - WhiteIcon
+  - YellowIcon
   layers:
   - Default
   - TransparentFX
@@ -21,7 +29,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - BackgroundGrid
   - 
   - 
   - 
